@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.spec
+
+# App-local state
+*.sqlite
+*.sqlite-journal
+*.bak.*
+
+# Audio corpus (large, checked in via Git LFS only on CI)
+tests/fixtures/audio/*.wav
+tests/fixtures/audio/*.mp3
+tests/fixtures/audio/*.flac
+!tests/fixtures/audio/README.md
+!tests/fixtures/audio/ground_truth.json
+
+# IDE
+.vscode/
+.idea/

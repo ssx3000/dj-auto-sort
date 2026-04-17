@@ -1,0 +1,54 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install base + dev deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: |
+          ruff check .
+
+      - name: Run tests (without Essentia)
+        run: |
+          pytest -v -m "not needs_essentia and not needs_fixtures_audio"
+
+  test-with-essentia:
+    runs-on: windows-latest
+    continue-on-error: true  # Essentia wheels are fragile on Windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install with analysis-full extra
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,analysis-full]"
+
+      - name: Run Essentia-gated tests
+        run: |
+          pytest -v -m "needs_essentia"
