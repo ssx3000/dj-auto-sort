@@ -6,7 +6,7 @@ Analyzes BPM, key, energy, and genre/mood; cleans metadata; organizes folders an
 
 ## Status
 
-Phase 1 — scaffolding. See plan at `C:\Users\sxl50\.claude\plans\i-want-to-create-quiet-llama.md`.
+Phases 1–7 complete: scaffold, adapters, analyzers, organize, sync, PySide6 UI, and PyInstaller packaging. See plan at `C:\Users\sxl50\.claude\plans\i-want-to-create-quiet-llama.md`.
 
 ## Quick start (development)
 
@@ -30,6 +30,16 @@ If the Essentia wheel fails to install on your Python version, the app falls bac
 ```bash
 dj-auto-sort
 ```
+
+## Build a Windows executable
+
+```bash
+pip install -e ".[dev,packaging]"
+python packaging/build.py --clean
+```
+
+Produces `dist/dj-auto-sort.exe` (one-file, windowed). To sign the output, set
+`SIGNTOOL_CERT_PATH` + `SIGNTOOL_CERT_PASSWORD` and pass `--sign`.
 
 ## Testing scopes
 
