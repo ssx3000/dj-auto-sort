@@ -6,9 +6,14 @@ Every fixture here should be cheap — heavy audio corpora live behind the
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pytest
+
+# Run all Qt tests against the offscreen platform so they work without a
+# display (CI, tmux sessions). Must be set before any PySide6 import.
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures"
 

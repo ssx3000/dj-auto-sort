@@ -16,6 +16,7 @@ class Config:
     serato_root: Path | None = None  # folder containing _Serato_
     virtualdj_database_path: Path | None = None
 
+    organize_root: Path | None = None  # destination root for organize step; None = skip
     folder_template: str = "{genre}/{artist} - {title}"
     backup_before_write: bool = True
 
