@@ -16,7 +16,9 @@ import soundfile as sf
 from dj_auto_sort.analysis.bpm import BpmResult, detect_bpm
 
 
-def _write_click_track(path: Path, *, bpm: float, duration_s: float = 16.0, sr: int = 44100) -> None:
+def _write_click_track(
+    path: Path, *, bpm: float, duration_s: float = 16.0, sr: int = 44100
+) -> None:
     """Write a kick-drum-like click track at ``bpm``.
 
     librosa's beat tracker works best with broadband onset energy (as in real

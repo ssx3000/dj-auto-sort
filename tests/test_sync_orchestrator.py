@@ -45,7 +45,16 @@ def test_sync_reads_source_and_writes_target(tmp_path: Path) -> None:
     rb_root = tmp_path / "rb"
     _seed_vdj(
         vdj_root,
-        [TrackRecord(path=src_audio, title="A", artist="Artist", genre="House", bpm=128.0, key_camelot="8A")],
+        [
+            TrackRecord(
+                path=src_audio,
+                title="A",
+                artist="Artist",
+                genre="House",
+                bpm=128.0,
+                key_camelot="8A",
+            )
+        ],
     )
 
     report = sync(

@@ -21,6 +21,7 @@ this project where a crash can lose user data. We take three precautions:
 
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 from dataclasses import dataclass
@@ -126,16 +127,11 @@ def _copy_fsync_rename(src: Path, dst: Path) -> None:
         tmp.replace(dst)
     except OSError:
         if tmp.exists():
-            try:
+            with contextlib.suppress(OSError):
                 tmp.unlink()
-            except OSError:
-                pass
         raise
-    # Only unlink the source after the destination is visibly in place.
-    try:
+    # Destination is written; leaving the source as an orphan is a recoverable
+    # state (library will see a duplicate next scan) rather than data loss, so
+    # we don't re-raise if the source unlink fails.
+    with contextlib.suppress(OSError):
         src.unlink()
-    except OSError:
-        # Destination is written; leaving the source as an orphan is a
-        # recoverable state (the library will see a duplicate next scan)
-        # rather than a data-loss state, so we don't re-raise.
-        pass

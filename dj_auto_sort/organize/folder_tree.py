@@ -55,7 +55,7 @@ def render_target_path(template: str, track: TrackRecord, root: Path) -> Path:
 def _render_part(part: str, tokens: dict[str, str]) -> str:
     formatter = Formatter()
     out: list[str] = []
-    for literal, field_name, format_spec, conversion in formatter.parse(part):
+    for literal, field_name, _format_spec, _conversion in formatter.parse(part):
         if literal:
             out.append(literal)
         if field_name is None:
