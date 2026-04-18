@@ -34,8 +34,10 @@ jobs:
           pytest -v -m "not needs_essentia and not needs_fixtures_audio"
 
   test-with-essentia:
-    runs-on: windows-latest
-    continue-on-error: true  # Essentia wheels are fragile on Windows
+    # essentia-tensorflow ships manylinux wheels only — no Windows wheels on PyPI.
+    # Analysis code is OS-agnostic, so we run these tests on Linux.
+    runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
