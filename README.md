@@ -10,6 +10,25 @@ I don't mind if you use this as a foundation towards what you need. If you make 
 
 Finally, I want to give thanks to https://www.twitch.tv/spontaneousmixx & https://www.twitch.tv/djchickenw33d for the concept
 
+## What it does
+
+Point the tool at your Rekordbox, Serato, and/or Virtual DJ library folders and it will:
+
+1. Read each library through the matching adapter in [`dj_auto_sort/adapters/`](dj_auto_sort/adapters/).
+2. Analyze every track for BPM, key (Camelot wheel), energy (1–10), and genre/mood.
+3. Clean inconsistent metadata tags and propose a tidier folder tree.
+4. Show a **dry-run preview** in the UI before touching anything — dry-run is the default.
+5. **Back up originals**, then write consistent metadata and playlists back to every configured app so all three stay in sync.
+
+Your source audio files are never deleted or rewritten in place without a backup first.
+
+## Features
+
+- **Library I/O** — Rekordbox, Serato DJ, and Virtual DJ (read + write) via pluggable adapters in [`dj_auto_sort/adapters/`](dj_auto_sort/adapters/).
+- **Analysis** — BPM, Camelot-wheel key, 1–10 energy rating, and genre/mood classification. Uses librosa by default; enables Essentia + MusicNN when the `[analysis-full]` extra is installed. See [`dj_auto_sort/analysis/`](dj_auto_sort/analysis/).
+- **Organize & sync** — folder-tree reorganization, fingerprint-based dedup, metadata cleaner, per-run backup, and a cross-app sync orchestrator that keeps all three libraries consistent. See [`dj_auto_sort/organize/`](dj_auto_sort/organize/) and [`dj_auto_sort/sync/`](dj_auto_sort/sync/).
+- **Desktop UI** — PySide6 app with a settings view, preview pane, threaded sync worker, persistent settings, and a first-run dialog.
+
 ## Status
 
 Phases 1–7 complete: scaffold, adapters, analyzers, organize, sync, PySide6 UI, and PyInstaller packaging. See plan at `C:\Users\sxl50\.claude\plans\i-want-to-create-quiet-llama.md`.
