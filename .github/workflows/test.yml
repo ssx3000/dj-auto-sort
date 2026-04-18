@@ -47,9 +47,11 @@ jobs:
           cache: pip
 
       - name: Install with analysis-full extra
+        # --pre: essentia-tensorflow only publishes .devN pre-releases on PyPI,
+        # which pip skips without this flag.
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,analysis-full]"
+          pip install --pre -e ".[dev,analysis-full]"
 
       - name: Run Essentia-gated tests
         run: |
