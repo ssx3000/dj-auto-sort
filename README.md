@@ -41,6 +41,16 @@ python packaging/build.py --clean
 Produces `dist/dj-auto-sort.exe` (one-file, windowed). To sign the output, set
 `SIGNTOOL_CERT_PATH` + `SIGNTOOL_CERT_PASSWORD` and pass `--sign`.
 
+To wrap the `.exe` in a Windows installer, install [Inno Setup 6](https://jrsoftware.org/isinfo.php)
+(requires `ISCC.exe` on `PATH`, or set `INNO_ISCC_EXE`) and pass `--installer`:
+
+```bash
+python packaging/build.py --clean --installer
+```
+
+Produces `dist/dj-auto-sort-setup-<version>.exe`. Combine with `--sign` to sign
+both the inner `.exe` and the installer.
+
 ## Testing scopes
 
 1. **Library parsing** — golden-file round-trip for Rekordbox/Serato/Virtual DJ
