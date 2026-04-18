@@ -21,9 +21,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Essentia wheels are Windows-fragile. Install explicitly after base install.
+# essentia-tensorflow only publishes .devN pre-releases on PyPI (Linux wheels
+# only). Dev suffix is < 2.1b6 in PEP 440 ordering, so the constraint targets
+# .dev0 and pip must be invoked with --pre.
 analysis-full = [
-    "essentia-tensorflow>=2.1b6",
+    "essentia-tensorflow>=2.1b6.dev0",
 ]
 # Optional audio fingerprinting for dedup (requires Chromaprint binary on PATH).
 fingerprint = [
