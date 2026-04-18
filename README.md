@@ -4,6 +4,12 @@ Windows desktop tool that auto-categorizes and auto-sorts music libraries for **
 
 Analyzes BPM, key, energy, and genre/mood; cleans metadata; organizes folders and playlists; keeps all three DJ apps' libraries consistent.
 
+This a proof of concept and has not been tested. If you using this as is, you are running this at your own risk. 
+
+I don't mind if you use this as a foundation towards what you need. If you make something better than this, good. 
+
+Finally, I want to give thanks to https://www.twitch.tv/spontaneousmixx & https://www.twitch.tv/djchickenw33d for the concept
+
 ## Status
 
 Phases 1–7 complete: scaffold, adapters, analyzers, organize, sync, PySide6 UI, and PyInstaller packaging. See plan at `C:\Users\sxl50\.claude\plans\i-want-to-create-quiet-llama.md`.
