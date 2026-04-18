@@ -46,6 +46,14 @@ jobs:
           python-version: "3.11"
           cache: pip
 
+      - name: Install Qt runtime libs for pytest-qt
+        # pytest-qt imports QtGui at pytest-configure time; on headless Ubuntu
+        # that needs libEGL + libGL. Without them pytest fails before any tests
+        # collect, even though the Essentia tests themselves don't touch Qt.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3
+
       - name: Install with analysis-full extra
         # --pre: essentia-tensorflow only publishes .devN pre-releases on PyPI,
         # which pip skips without this flag.
