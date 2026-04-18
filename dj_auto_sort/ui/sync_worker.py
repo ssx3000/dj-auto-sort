@@ -76,9 +76,34 @@ class SyncWorker(QObject):
                 dry_run=self._dry_run,
             )
         except Exception as exc:  # noqa: BLE001 — UI wants every failure surfaced
-            self.failed.emit(f"{type(exc).__name__}: {exc}")
+            self.failed.emit(humanize_error(exc))
             return
         self.finished.emit(report)
+
+
+def humanize_error(exc: BaseException) -> str:
+    """Translate common disk/permission errors into guidance for DJ users.
+
+    Keeps the underlying ``ExceptionType: message`` form as a fallback so we
+    don't silently swallow useful detail for classes we haven't hand-tuned.
+    """
+    filename = getattr(exc, "filename", None)
+    if isinstance(exc, FileNotFoundError) and filename:
+        return (
+            f"Couldn't find a library file at:\n\n{filename}\n\n"
+            "Check the path in the Settings panel and try again."
+        )
+    if isinstance(exc, PermissionError) and filename:
+        return (
+            f"Permission denied opening:\n\n{filename}\n\n"
+            "Make sure the DJ program isn't holding the file open, then try again."
+        )
+    if isinstance(exc, IsADirectoryError) and filename:
+        return (
+            f"Expected a file but got a folder:\n\n{filename}\n\n"
+            "Point the Settings field at the library file itself, not its parent folder."
+        )
+    return f"{type(exc).__name__}: {exc}"
 
 
 def _adapter_pairs(config: Config) -> list[tuple[LibraryAdapter, Path]]:

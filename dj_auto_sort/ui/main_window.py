@@ -14,6 +14,11 @@ Threading: we move a :class:`SyncWorker` onto a :class:`QThread` and connect
 the thread's ``started`` signal to ``worker.run``. The worker emits
 ``finished`` or ``failed`` back on the UI thread via Qt's default
 queued-connection semantics.
+
+Persistence: on construction we load the saved :class:`Config` via
+:mod:`config_store` and push it into the settings panel; every subsequent
+edit is persisted immediately via ``SettingsView.config_changed``. The
+first-run dialog fires only when no config has ever been saved.
 """
 
 from __future__ import annotations
@@ -24,6 +29,7 @@ from PySide6.QtCore import Qt, QThread, Slot
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QDialog,
     QHBoxLayout,
     QMainWindow,
     QMessageBox,
@@ -33,7 +39,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from dj_auto_sort.core import config_store
 from dj_auto_sort.sync.orchestrator import SyncReport
+from dj_auto_sort.ui.first_run_dialog import FirstRunDialog
 from dj_auto_sort.ui.preview_view import PreviewView
 from dj_auto_sort.ui.settings_view import SettingsView
 from dj_auto_sort.ui.sync_worker import SyncWorker
@@ -44,9 +52,16 @@ class MainWindow(QMainWindow):
         self,
         *,
         worker_factory: Callable[[], SyncWorker] = SyncWorker,
+        settings_provider: Callable[[], object] | None = None,
+        first_run_dialog_factory: Callable[[QWidget], QDialog] | None = None,
     ) -> None:
         super().__init__()
         self._worker_factory = worker_factory
+        # settings_provider returns the QSettings instance used for persistence;
+        # tests inject one pointing at an IniFormat file in a tmp dir to avoid
+        # touching the Windows registry.
+        self._settings_provider = settings_provider or config_store.default_settings
+        self._first_run_dialog_factory = first_run_dialog_factory or FirstRunDialog
         self.setWindowTitle("DJ Auto-Sort")
         self.resize(1100, 760)
 
@@ -79,11 +94,45 @@ class MainWindow(QMainWindow):
         self._thread: QThread | None = None
         self._worker: SyncWorker | None = None
 
+        self._load_saved_config()
+        # Autosave on every edit — QSettings writes are cheap and this matches
+        # the user's mental model ("I typed a path, it's safe now").
+        self.settings_view.config_changed.connect(self._persist_config)
+
     # --- public surface for tests --------------------------------------------------
 
     def trigger_run(self) -> None:
         """Kick off a sync immediately (bypasses the button, for tests)."""
         self._on_run_clicked()
+
+    def maybe_show_first_run(self) -> bool:
+        """Show the welcome dialog if no config has ever been saved.
+
+        Returns True if the dialog was shown. Called by :func:`run` right
+        after the window is visible so the onboarding modal appears on top
+        of a populated settings form.
+        """
+        if config_store.has_saved_config(self._settings_provider()):
+            return False
+        dialog = self._first_run_dialog_factory(self)
+        dialog.exec()
+        return True
+
+    # --- persistence --------------------------------------------------------------
+
+    def _load_saved_config(self) -> None:
+        saved = config_store.load_config(self._settings_provider())
+        # Block config_changed during bulk load — we don't want the autosave
+        # handler to fire once per field and thrash QSettings.
+        self.settings_view.blockSignals(True)
+        try:
+            self.settings_view.set_config(saved)
+        finally:
+            self.settings_view.blockSignals(False)
+
+    @Slot()
+    def _persist_config(self) -> None:
+        config_store.save_config(self.settings_view.get_config(), self._settings_provider())
 
     # --- slots ---------------------------------------------------------------------
 
@@ -122,7 +171,7 @@ class MainWindow(QMainWindow):
 
     @Slot(str)
     def _on_failed(self, message: str) -> None:
-        self.statusBar().showMessage(f"Sync failed: {message}")
+        self.statusBar().showMessage(f"Sync failed: {_first_line(message)}")
         QMessageBox.critical(self, "Sync failed", message)
 
     @Slot()
@@ -136,10 +185,17 @@ class MainWindow(QMainWindow):
         self.run_button.setEnabled(True)
 
 
+def _first_line(message: str) -> str:
+    return message.splitlines()[0] if message else ""
+
+
 def run(argv: list[str]) -> int:
     app = QApplication(argv)
+    app.setOrganizationName(config_store.ORGANIZATION)
+    app.setApplicationName(config_store.APPLICATION)
     window = MainWindow()
     window.show()
+    window.maybe_show_first_run()
     return app.exec()
 
 
